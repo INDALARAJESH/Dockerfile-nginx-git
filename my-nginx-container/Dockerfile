@@ -1,7 +1,6 @@
 # Use the official Nginx image as the base image
 FROM nginx
 
-MAINTAINER rajeshindala143@gmail.com
 # Remove the default Nginx configuration file
 RUN rm /etc/nginx/nginx.conf
 
