@@ -38,7 +38,7 @@ jobs:
         run: python3 update_mr_description.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure you set this in your repository secrets
+          TOKEN: ${{ secrets.TOKEN }}  # Ensure you set this in your repository secrets
 
       - name: Upload diff.txt
         uses: actions/upload-artifact@v3
