@@ -1,11 +1,11 @@
-name: Process Merge Request
+name: Process Pull Request
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
-  process_merge_request:
+  process_pull_request:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -35,10 +35,10 @@ jobs:
           cat diff.txt  # Display the contents of diff.txt to verify its content (for debugging purposes)
 
       - name: Run Python script
-        run: python3 update_mr_description.py
+        run: python3 update_pr_description.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          TOKEN: ${{ secrets.TOKEN }}  # Ensure you set this in your repository secrets
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure you set this in your repository secrets
 
       - name: Upload diff.txt
         uses: actions/upload-artifact@v3
