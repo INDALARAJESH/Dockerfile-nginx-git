@@ -9,5 +9,4 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy the website files to the container
 COPY site1 /usr/share/nginx/html/site1
-COPY site2 /usr/share/nginx/html/site2
 
