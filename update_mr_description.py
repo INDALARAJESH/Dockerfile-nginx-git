@@ -9,9 +9,9 @@ OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 if not OPENAI_API_KEY:
     raise KeyError('OPENAI_API_KEY not found in environment variables')
 
-GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
-if not GITHUB_TOKEN:
-    raise KeyError('GITHUB_TOKEN not found in environment variables')
+TOKEN = os.environ.get('TOKEN')
+if not TOKEN:
+    raise KeyError('TOKEN not found in environment variables')
 
 REPO_OWNER = os.environ.get('GITHUB_REPO_OWNER')
 if not REPO_OWNER:
@@ -48,7 +48,7 @@ def process_diff_with_openai(diff, retries=3, delay=60):
 def update_pull_request_description(description):
     url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}'
     headers = {
-        'Authorization': f'token {GITHUB_TOKEN}',
+        'Authorization': f'token {TOKEN}',
         'Accept': 'application/vnd.github.v3+json'
     }
     data = {'body': description}
