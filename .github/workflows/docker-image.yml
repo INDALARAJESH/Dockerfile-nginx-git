@@ -1,0 +1,47 @@
+name: Process Merge Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  process_merge_request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 20  # Custom variable to control git fetch depth
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'  # Use Python 3.9
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests openai==0.28  # Install specific version of OpenAI library
+
+      - name: Fetch target branch
+        run: |
+          echo "Fetching branch=main"
+          git fetch origin main
+
+      - name: Get git diff
+        run: |
+          git diff origin/main > diff.txt
+          ls -l  # List files to verify diff.txt is created
+          cat diff.txt  # Display the contents of diff.txt to verify its content (for debugging purposes)
+
+      - name: Run Python script
+        run: python3 update_mr_description.py
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure you set this in your repository secrets
+
+      - name: Upload diff.txt
+        uses: actions/upload-artifact@v3
+        with:
+          name: diff-file
+          path: diff.txt
