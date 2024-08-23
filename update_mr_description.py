@@ -13,13 +13,9 @@ TOKEN = os.environ.get('TOKEN')
 if not TOKEN:
     raise KeyError('TOKEN not found in environment variables')
 
-REPO_OWNER = os.environ.get('GITHUB_REPO_OWNER')
-if not REPO_OWNER:
-    raise KeyError('GITHUB_REPO_OWNER not found in environment variables')
-
-REPO_NAME = os.environ.get('GITHUB_REPO_NAME')
-if not REPO_NAME:
-    raise KeyError('GITHUB_REPO_NAME not found in environment variables')
+# Automatically determine the GitHub repository owner and name
+REPO_OWNER = os.environ.get('GITHUB_REPOSITORY', '').split('/')[0]
+REPO_NAME = os.environ.get('GITHUB_REPOSITORY', '').split('/')[1]
 
 PR_NUMBER = os.environ.get('GITHUB_PR_NUMBER')
 if not PR_NUMBER:
@@ -55,6 +51,8 @@ def update_pull_request_description(description):
     response = requests.patch(url, headers=headers, json=data)
     if response.status_code != 200:
         print(f"Failed to update pull request: {response.status_code}, {response.text}")
+    else:
+        print(f"Successfully updated the pull request description for PR #{PR_NUMBER}")
 
 if __name__ == '__main__':
     diff = get_diff()
