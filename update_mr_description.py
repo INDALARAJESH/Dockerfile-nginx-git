@@ -1,8 +1,8 @@
 import os
+import json
 import time
 import requests
 import openai
-import json
 from openai.error import RateLimitError
 
 # Load environment variables
@@ -14,21 +14,17 @@ TOKEN = os.environ.get('TOKEN')
 if not TOKEN:
     raise KeyError('TOKEN not found in environment variables')
 
-# Automatically determine the GitHub repository owner and name
-REPO_OWNER = os.environ.get('GITHUB_REPOSITORY', '').split('/')[0]
-REPO_NAME = os.environ.get('GITHUB_REPOSITORY', '').split('/')[1]
-
-# Automatically determine the PR number from the GitHub event payload
-GITHUB_EVENT_PATH = os.environ.get('GITHUB_EVENT_PATH')
+# Extract PR number from GitHub event payload
+GITHUB_EVENT_PATH = os.getenv('GITHUB_EVENT_PATH')
 if not GITHUB_EVENT_PATH:
     raise KeyError('GITHUB_EVENT_PATH not found in environment variables')
 
 with open(GITHUB_EVENT_PATH, 'r') as f:
     event_data = json.load(f)
-    PR_NUMBER = event_data.get('pull_request', {}).get('number')
+    PR_NUMBER = event_data['pull_request']['number']
 
-if not PR_NUMBER:
-    raise KeyError('Pull Request number not found in the GitHub event payload')
+REPO_OWNER = event_data['repository']['owner']['login']
+REPO_NAME = event_data['repository']['name']
 
 openai.api_key = OPENAI_API_KEY
 
@@ -44,7 +40,7 @@ def process_diff_with_openai(diff, retries=3, delay=60):
                 messages=[{"role": "user", "content": f"Summarize the following git diff:\n\n{diff}"}],
                 temperature=0.5,
             )
-            return response.choices[0]['message']['content']
+            return response.choices[0].message['content']
         except RateLimitError as e:
             print(f"RateLimitError: {e}. Retrying in {delay} seconds... (Attempt {attempt + 1}/{retries})")
             time.sleep(delay)
@@ -58,10 +54,9 @@ def update_pull_request_description(description):
     }
     data = {'body': description}
     response = requests.patch(url, headers=headers, json=data)
+    print(f"GitHub API response: {response.status_code}, {response.text}")  # Debugging
     if response.status_code != 200:
         print(f"Failed to update pull request: {response.status_code}, {response.text}")
-    else:
-        print(f"Successfully updated the pull request description for PR #{PR_NUMBER}")
 
 if __name__ == '__main__':
     diff = get_diff()
