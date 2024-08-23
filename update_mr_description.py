@@ -2,6 +2,7 @@ import os
 import time
 import requests
 import openai
+import json
 from openai.error import RateLimitError
 
 # Load environment variables
@@ -17,9 +18,17 @@ if not TOKEN:
 REPO_OWNER = os.environ.get('GITHUB_REPOSITORY', '').split('/')[0]
 REPO_NAME = os.environ.get('GITHUB_REPOSITORY', '').split('/')[1]
 
-PR_NUMBER = os.environ.get('GITHUB_PR_NUMBER')
+# Automatically determine the PR number from the GitHub event payload
+GITHUB_EVENT_PATH = os.environ.get('GITHUB_EVENT_PATH')
+if not GITHUB_EVENT_PATH:
+    raise KeyError('GITHUB_EVENT_PATH not found in environment variables')
+
+with open(GITHUB_EVENT_PATH, 'r') as f:
+    event_data = json.load(f)
+    PR_NUMBER = event_data.get('pull_request', {}).get('number')
+
 if not PR_NUMBER:
-    raise KeyError('GITHUB_PR_NUMBER not found in environment variables')
+    raise KeyError('Pull Request number not found in the GitHub event payload')
 
 openai.api_key = OPENAI_API_KEY
 
